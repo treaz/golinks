@@ -57,6 +57,7 @@
           </fieldset>
           <fieldset class="flex">
             <label><input type="text" placeholder="description" v-model="link.description"></label>
+            <label><input type="checkbox" v-model="link.is_parameterized"> <span class="checkable">Parameterized</span></label>
           </fieldset>
           <fieldset>
             <label><input type="text" placeholder="tags" v-model="newTagName"></label>
@@ -96,6 +97,7 @@
           keyword: '',
           destination: '',
           description: '',
+          is_parameterized: false,
           tags: [],
         },
         newTagName: '',
@@ -185,7 +187,9 @@
           this.link.id = ""
           this.link.description = ""
           this.link.keyword = ""
+          this.link.keyword = ""
           this.link.destination = ""
+          this.link.is_parameterized = false
           this.link.tags = []
 
       },

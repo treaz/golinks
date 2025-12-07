@@ -79,7 +79,9 @@ func (c *AppController) CreateLink(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// prevent redirection loop
-	u, err := url.Parse(ic.Destination)
+	// Handle {*} in destination for parsing check
+	safeDestination := strings.ReplaceAll(ic.Destination, "{*}", "placeholder")
+	u, err := url.Parse(safeDestination)
 	if err != nil {
 		JsonError(w, err, http.StatusBadRequest, "error parsing destination")
 		return
@@ -132,7 +134,9 @@ func (c *AppController) UpdateLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// prevent redirection loop
-	u, err := url.Parse(ic.Destination)
+	// Handle {*} in destination for parsing check
+	safeDestination := strings.ReplaceAll(ic.Destination, "{*}", "placeholder")
+	u, err := url.Parse(safeDestination)
 	if err != nil {
 		JsonError(w, err, http.StatusBadRequest, "error parsing destination")
 		return

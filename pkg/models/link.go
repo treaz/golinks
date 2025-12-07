@@ -12,23 +12,25 @@ import (
 )
 
 type LinkInput struct {
-	Keyword     string `json:"keyword"`
-	Description string `json:"description"`
-	Destination string `json:"destination"`
-	Views       int    `json:"views"`
-	Tags        []Tag  `json:"tags"`
+	Keyword         string `json:"keyword"`
+	Description     string `json:"description"`
+	Destination     string `json:"destination"`
+	Views           int    `json:"views"`
+	Tags            []Tag  `json:"tags"`
+	IsParameterized bool   `json:"is_parameterized"`
 }
 
 type Link struct {
-	ID          uint         `json:"id" gorm:"primarykey"`
-	CreatedAt   time.Time    `json:"created_at"`
-	UpdatedAt   time.Time    `json:"updated_at"`
-	DeletedAt   sql.NullTime `json:"-" gorm:"index"`
-	Keyword     string       `json:"keyword" gorm:"unique;index"`
-	Description string       `json:"description"`
-	Destination string       `json:"destination"`
-	Views       int          `json:"views"`
-	Tags        []Tag        `json:"tags" gorm:"many2many:link_tags;"`
+	ID              uint         `json:"id" gorm:"primarykey"`
+	CreatedAt       time.Time    `json:"created_at"`
+	UpdatedAt       time.Time    `json:"updated_at"`
+	DeletedAt       sql.NullTime `json:"-" gorm:"index"`
+	Keyword         string       `json:"keyword" gorm:"unique;index"`
+	Description     string       `json:"description"`
+	Destination     string       `json:"destination"`
+	Views           int          `json:"views"`
+	Tags            []Tag        `json:"tags" gorm:"many2many:link_tags;"`
+	IsParameterized bool         `json:"is_parameterized"`
 }
 
 func hasScheme(value interface{}) error {
@@ -37,6 +39,18 @@ func hasScheme(value interface{}) error {
 		return errors.New("requires scheme http or https")
 	}
 	return nil
+}
+
+func validDestination(value interface{}) error {
+	s, ok := value.(string)
+	if !ok {
+		return errors.New("must be a string")
+	}
+	// Replace {*} with a safe placeholder for validation
+	s = strings.ReplaceAll(s, "{*}", "placeholder")
+
+	// Use ozzo-validation's URL validator on the modified string
+	return is.URL.Validate(s)
 }
 
 // TODO Put in validation for programtic links gh/%s
@@ -51,7 +65,7 @@ func (l LinkInput) Validate() error {
 			validation.Match(regexp.MustCompile(`^([a-zA-Z0-9\-\/]+)`))),
 		validation.Field(&l.Destination,
 			validation.Required,
-			is.URL,
+			validation.By(validDestination),
 			validation.By(hasScheme),
 		),
 	)
@@ -59,10 +73,16 @@ func (l LinkInput) Validate() error {
 
 func (li *LinkInput) ToNative() Link {
 
+	isParameterized := li.IsParameterized
+	if strings.Contains(li.Destination, "{*}") {
+		isParameterized = true
+	}
+
 	return Link{
-		Keyword:     strings.ToLower(li.Keyword),
-		Destination: li.Destination,
-		Description: li.Description,
+		Keyword:         strings.ToLower(li.Keyword),
+		Destination:     li.Destination,
+		Description:     li.Description,
+		IsParameterized: isParameterized,
 	}
 }
 

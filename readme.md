@@ -1,3 +1,28 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Golinks](#golinks)
+  - [History of Golinks](#history-of-golinks)
+  - [Why](#why)
+  - [Setup](#setup)
+    - [Install](#install)
+    - [Database](#database)
+    - [Run](#run)
+    - [Run At Startup](#run-at-startup)
+    - [Docker](#docker)
+    - [Browser Extension Redirect Setup (Recommended)](#browser-extension-redirect-setup-recommended)
+      - [Using Redirector Extension](#using-redirector-extension)
+    - [DNS Setup (Manual)](#dns-setup-manual)
+    - [Port Redirection Setup (Manual)](#port-redirection-setup-manual)
+  - [FAQ](#faq)
+  - [Troubleshooting](#troubleshooting)
+  - [Developing](#developing)
+  - [Roadmap](#roadmap)
+  - [Contributing](#contributing)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 
 # Golinks
 
@@ -88,71 +113,30 @@ docker build . -t crhuber/golinks:latest
 docker run -p 8998:8998 crhuber/golinks
 ```
 
-### DNS Setup
+### Browser Extension Redirect Setup (Recommended)
 
-* The automatic way: use [dev-proxy](https://github.com/crhuber/dev-proxy)
+For a true go/alias experience in your browser, you can use a redirect browser extension instead of complex DNS and port configuration.
 
-* The manual way:
+#### Using Redirector Extension
 
-Add a host record to point to your golinks server.
-If running locally,  edit your local hostfile:`sudo nano /etc/hosts`
+1.  **Install the Extension:**
+    *   Redirector for Chrome
+    *   Redirector for Firefox
 
-```bash
-127.0.0.2       go.internal
-```
+2.  **Configure a Redirect Rule:**
+    *   Open extension settings
+    *   Add a new redirect with these settings:
+        *   **Description:** `GoLink Redirector`
+        *   **Example URL:** `http://go/docs`
+        *   **Include pattern:** `^http://go/(.*)$`
+        *   **Redirect to:** `http://go/$1` or if you didn't update the `/etc/hosts` file `http://localhost:8998/$1`
+        *   **Pattern type:** `Regular Expression`
 
-Add the host suffix to your search domains.
-System Preferences>Network>Advanced>DNS>Search Domains:
+3.  **Usage:**
+    *   Simply type `go/docs` (or any alias) in your browser's address bar.
+    *   The extension will redirect to your local GoLink server.
+    *   **Note:** You must first open the link using `http://go/{alias}` for each link before the browser will recognize this as a valid path. (You can use the `open` command to do this quickly). This is because the browser will try search first if the url is not recognized.
 
-```
-Search Domains:
-.internal
-```
-
-### Port Redirection Setup
-
-* The automatic way: use [dev-proxy](https://github.com/crhuber/dev-proxy)
-
-* The manual way:
-
-If you have a local instance of golinks running on your machine, you will need to append the port everytime you want to use golinks in the browser
-ie: `go:8998/foo` which is not ideal. To get around this we can run a few hacks.
-
-Create an alias for 127.0.0.2 to point to loopback:
-
-```
-sudo ifconfig lo0 alias 127.0.0.2
-```
-
-To persist this after reboot, edit and copy `io.intra.ifconfig.plist` to system `LaunchDaemons`
-
-```
-sudo cp io.intra.ifconfig.plist  /Library/LaunchDaemons/
-```
-
-Create a port forwarding rule to forward traffic destined for `127.0.0.2:80` to be redirected to local golinks on port 8998
-
-```
-echo "rdr pass inet proto tcp from any to 127.0.0.2 port 80 -> 127.0.0.1 port 8998" | sudo pfctl -ef -
-```
-
-Edit hosts file to modify go.internal to point to 127.0.0.2
-
-```bash
-127.0.0.2       go.internal
-```
-
-Display current port forwarding
-
-```
-sudo pfctl -s nat
-```
-
-Remove port forwarding
-
-```
-sudo pfctl -F all -f /etc/pf.conf
-```
 
 ## FAQ
 
@@ -161,10 +145,21 @@ sudo pfctl -F all -f /etc/pf.conf
     http://go:8998/
 
 
-* How do programmatic links work?
+* How do variable links work?
 
-    Create short links that inject variables by using `{*}`. For example: `gh/{*}` to link to `https://github.com/{*}`.
-    So when a user types `gh/torvalds` the `{*}` will be replaced and the browser will be redirected to `https://github.com/torvalds`
+    You can create dynamic links that accept parameters by adding `{*}` to your destination URL.
+    
+    For example:
+    *   Keyword: `gh`
+    *   Destination: `https://github.com/{*}`
+    
+    When a user types `go/gh/torvalds`, the `{*}` will be replaced with `torvalds`, redirecting to `https://github.com/torvalds`.
+    
+    You can also use multiple variables:
+    *   Keyword: `jira`
+    *   Destination: `https://{*}.jira.com/browse/{*}`
+    
+    Typing `go/jira/github/PROJ-123` will redirect to `https://github.jira.com/browse/PROJ-123`.
 
 ## Troubleshooting
 
@@ -187,7 +182,6 @@ INFO[0000] Starting server on port :8998
 ## Roadmap
 
 - Add CLI interface to adding/removing/searching links from command line
-- Browser extension (maybe)
 - UI Refactor
 
 ## Contributing

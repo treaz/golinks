@@ -48,6 +48,7 @@ func NewRouter(db *database.DbConnection) *chi.Mux {
 	router.Handle("/favicon.ico", http.FileServer(http.FS(serverRoot)))
 	router.Get("/{keyword}", ac.GetKeyword)
 	router.HandleFunc("/{keyword}/{subkey}", ac.GetKeyword)
+	router.HandleFunc("/{keyword}/*", ac.GetKeyword)
 	router.Handle("/", http.FileServer(http.FS(serverRoot)))
 	return router
 }
