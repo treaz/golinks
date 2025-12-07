@@ -30,10 +30,6 @@ forked from crhuber/golinks
 Golinks is an internal URL shortener that organizes your company links into easily rememberable keywords. If you’re on the company network, you can type in <code>go/keyword</code> in your browser, and that will redirect you to the expanded url.
 
 
-## History of Golinks
-
-Benjamin Staffin at Google developed a golink system that introduced the "go/" domain and allowed Googlers to simply use the shortlink “go/link” in their browser. Benjamin described golinks as "AOL keywords for the corporate network."
-
 ## Why
 
 I developed this to scratch my own itch mostly and to learn Go. It was built intending to be run locally on localhost using a sqllite database. It is meant to be lightweight and simple. I was inspired by
@@ -178,6 +174,14 @@ watching .
 building...
 running...
 INFO[0000] Starting server on port :8998
+```
+
+### Testing
+
+To run the test suite:
+
+```bash
+go test ./...
 ```
 
 ## Roadmap

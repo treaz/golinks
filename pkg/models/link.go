@@ -62,7 +62,7 @@ func (l LinkInput) Validate() error {
 			validation.Required,
 			validation.Length(1, 100),
 			validation.NotIn("api", "static", "directory", "healthz", "favicon.ico"),
-			validation.Match(regexp.MustCompile(`^([a-zA-Z0-9\-\/]+)`))),
+			validation.Match(regexp.MustCompile(`^[a-zA-Z0-9\-][a-zA-Z0-9\-\/]*$`))),
 		validation.Field(&l.Destination,
 			validation.Required,
 			validation.By(validDestination),

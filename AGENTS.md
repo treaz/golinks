@@ -47,7 +47,7 @@ Golinks is an internal URL shortener service that redirects short `go/keyword` l
 ## Testing Instructions
 
 - **Run Tests**:
-  *Current status*: No comprehensive test suite detected.
+  The project has unit tests for models (`pkg/models`) and integration tests for controllers (`pkg/controllers`).
   ```bash
   go test ./...
   ```
