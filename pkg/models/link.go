@@ -12,25 +12,21 @@ import (
 )
 
 type LinkInput struct {
-	Keyword         string `json:"keyword"`
-	Description     string `json:"description"`
-	Destination     string `json:"destination"`
-	Views           int    `json:"views"`
-	Tags            []Tag  `json:"tags"`
-	IsParameterized bool   `json:"is_parameterized"`
+	Keyword     string `json:"keyword"`
+	Description string `json:"description"`
+	Destination string `json:"destination"`
+	Views       int    `json:"views"`
 }
 
 type Link struct {
-	ID              uint         `json:"id" gorm:"primarykey"`
-	CreatedAt       time.Time    `json:"created_at"`
-	UpdatedAt       time.Time    `json:"updated_at"`
-	DeletedAt       sql.NullTime `json:"-" gorm:"index"`
-	Keyword         string       `json:"keyword" gorm:"unique;index"`
-	Description     string       `json:"description"`
-	Destination     string       `json:"destination"`
-	Views           int          `json:"views"`
-	Tags            []Tag        `json:"tags" gorm:"many2many:link_tags;"`
-	IsParameterized bool         `json:"is_parameterized"`
+	ID          uint         `json:"id" gorm:"primarykey"`
+	CreatedAt   time.Time    `json:"created_at"`
+	UpdatedAt   time.Time    `json:"updated_at"`
+	DeletedAt   sql.NullTime `json:"-" gorm:"index"`
+	Keyword     string       `json:"keyword" gorm:"unique;index"`
+	Description string       `json:"description"`
+	Destination string       `json:"destination"`
+	Views       int          `json:"views"`
 }
 
 func hasScheme(value interface{}) error {
@@ -72,17 +68,10 @@ func (l LinkInput) Validate() error {
 }
 
 func (li *LinkInput) ToNative() Link {
-
-	isParameterized := li.IsParameterized
-	if strings.Contains(li.Destination, "{*}") {
-		isParameterized = true
-	}
-
 	return Link{
-		Keyword:         strings.ToLower(li.Keyword),
-		Destination:     li.Destination,
-		Description:     li.Description,
-		IsParameterized: isParameterized,
+		Keyword:     strings.ToLower(li.Keyword),
+		Destination: li.Destination,
+		Description: li.Description,
 	}
 }
 

@@ -29,7 +29,7 @@ func NewAppController(db *database.DbConnection) *AppController {
 func (c *AppController) GetLink(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	link := models.Link{}
-	err := c.db.Db.Preload("Tags").First(&link, id).Error
+	err := c.db.Db.First(&link, id).Error
 	if err != nil {
 		JsonError(w, err, http.StatusNotFound, "Not Found")
 		return
@@ -63,7 +63,7 @@ func (c *AppController) GetLinks(w http.ResponseWriter, r *http.Request) {
 	}
 
 	links := models.Links{}
-	c.db.Db.Preload("Tags").Order(fmt.Sprintf("%s %s", qs.Sort, qs.Order)).Find(&links)
+	c.db.Db.Order(fmt.Sprintf("%s %s", qs.Sort, qs.Order)).Find(&links)
 	JsonResponse(w, links)
 }
 
@@ -103,22 +103,6 @@ func (c *AppController) CreateLink(w http.ResponseWriter, r *http.Request) {
 		JsonError(w, err, http.StatusBadRequest, "error saving link to db. keywords must be unique")
 		return
 	}
-	// parse tags
-	tags := []models.Tag{}
-	for _, t := range ic.Tags {
-		tag := models.Tag{
-			Name: t.Name,
-		}
-		// create a new tag if it doesnt already exist
-		err = c.db.Db.Table("tags").First(&tag, "name = ?", tag.Name).Error
-		if err != nil {
-			slog.Info("Tag not found, creating a new one")
-			c.db.Db.Create(&tag)
-		}
-		tags = append(tags, tag)
-	}
-	// append tags
-	c.db.Db.Model(&link).Association("Tags").Append(&tags)
 	JsonResponse(w, link)
 }
 
@@ -159,22 +143,6 @@ func (c *AppController) UpdateLink(w http.ResponseWriter, r *http.Request) {
 
 	newLink := ic.ToNative()
 	c.db.Db.Model(&oldLink).Updates(newLink)
-	// parse tags
-	tags := []models.Tag{}
-	for _, t := range ic.Tags {
-		tag := models.Tag{
-			Name: t.Name,
-		}
-		// create a new tag if it doesnt already exist
-		err = c.db.Db.Table("tags").First(&tag, "name = ?", tag.Name).Error
-		if err != nil {
-			slog.Info("Tag not found, creating a new one")
-			c.db.Db.Create(&tag)
-		}
-		tags = append(tags, tag)
-	}
-	// append tags
-	c.db.Db.Model(&oldLink).Association("Tags").Replace(&tags)
 	JsonResponse(w, oldLink)
 }
 
@@ -197,13 +165,13 @@ func (c *AppController) Health(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (c *AppController) SearchTags(w http.ResponseWriter, r *http.Request) {
+func (c *AppController) SearchLinks(w http.ResponseWriter, r *http.Request) {
 	input := r.URL.Query().Get("qs")
 	if input == "" {
 		JsonError(w, nil, http.StatusBadRequest, "query string is required")
 		return
 	}
 	links := models.Links{}
-	c.db.Db.Preload("Tags").Limit(10).Where("keyword LIKE ?", fmt.Sprintf("%v%%", input)).Find(&links)
+	c.db.Db.Limit(10).Where("keyword LIKE ?", fmt.Sprintf("%v%%", input)).Find(&links)
 	JsonResponse(w, links)
 }

@@ -47,5 +47,20 @@ func (c *DbConnection) Close() error {
 
 // RunMigration runs db migrations
 func (c *DbConnection) RunMigration() error {
-	return c.Db.AutoMigrate(&models.Link{}, &models.Tag{})
+	// Drop the is_parameterized column if it exists (migration cleanup)
+	if c.Db.Migrator().HasColumn(&models.Link{}, "is_parameterized") {
+		c.Db.Migrator().DropColumn(&models.Link{}, "is_parameterized")
+	}
+	
+	// Drop link_tags junction table if it exists (migration cleanup)
+	if c.Db.Migrator().HasTable("link_tags") {
+		c.Db.Migrator().DropTable("link_tags")
+	}
+	
+	// Drop tags table if it exists (migration cleanup)
+	if c.Db.Migrator().HasTable("tags") {
+		c.Db.Migrator().DropTable("tags")
+	}
+	
+	return c.Db.AutoMigrate(&models.Link{})
 }

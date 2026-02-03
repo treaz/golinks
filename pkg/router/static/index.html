@@ -19,7 +19,6 @@
           <th><button @click="onClickSort('destination')">Destination</button></th>
           <th><button @click="onClickSort('description')">Description</button></th>
           <th><button @click="onClickSort('views')">Views</button></th>
-          <th><button @click="onClickSort('tags')">Tags</button></th>
           <th>Edit</th>
         </tr>
       </thead>
@@ -31,11 +30,6 @@
           </td>
           <td>{{link.description}}</td>
           <td>{{link.views}}</td>
-          <td>
-            <label v-for="tag in link.tags">
-              <span class="label success">{{tag.name}}</span>
-            </label>
-          </td>
           <td><label class="button" @click="editLink(link.id)" for="modal_1">Edit</label></td>
         </tr>
       </tbody>
@@ -55,16 +49,8 @@
             <label><input type="text" placeholder="keyword" v-model="link.keyword"></label>
             <label><input type="text" placeholder="destination" v-model="link.destination"></label>
           </fieldset>
-          <fieldset class="flex">
-            <label><input type="text" placeholder="description" v-model="link.description"></label>
-            <label><input type="checkbox" v-model="link.is_parameterized"> <span class="checkable">Parameterized</span></label>
-          </fieldset>
           <fieldset>
-            <label><input type="text" placeholder="tags" v-model="newTagName"></label>
-            <button @click="appendTag">+</button>
-            <label v-for="tag in link.tags">
-              <span class="label">{{tag.name}}</span>
-            </label>
+            <label><input type="text" placeholder="description" v-model="link.description"></label>
           </fieldset>
         </section>
         <section v-for="error in errors">
@@ -97,10 +83,7 @@
           keyword: '',
           destination: '',
           description: '',
-          is_parameterized: false,
-          tags: [],
         },
-        newTagName: '',
         searchInput: '',
         sortAscending: false,
         errors: [],
@@ -120,29 +103,13 @@
 
         this.links = this.links.filter(link => {
           for (const [key, value] of Object.entries(link)) {
-            if (Array.isArray(value)) {
-              for (const it of value) {
-                // search tags
-                if (matches(it.name)) {
-                  return true;
-                }
-              }
-            } else {
-              if (matches(value)) {
-                return true;
-              }
+            if (matches(value)) {
+              return true;
             }
           }
 
           return false;
         });
-      },
-      appendTag() {
-        const newTag = {
-          name: this.newTagName
-        }
-        this.link.tags.push(newTag)
-        this.newTagName = ''
       },
       editLink(id) {
         this.link = {}
@@ -189,8 +156,6 @@
           this.link.keyword = ""
           this.link.keyword = ""
           this.link.destination = ""
-          this.link.is_parameterized = false
-          this.link.tags = []
 
       },
       newLink(){

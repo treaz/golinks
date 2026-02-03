@@ -36,13 +36,7 @@ func NewRouter(db *database.DbConnection) *chi.Mux {
 	router.Get("/api/v1/link/{id}", ac.GetLink)
 	router.Delete("/api/v1/link/{id}", ac.DeleteLink)
 	router.Patch("/api/v1/link/{id}", ac.UpdateLink)
-	router.Get("/api/v1/search", ac.SearchTags)
-	// tags
-	router.Get("/api/v1/tags", ac.GetTags)
-	router.Post("/api/v1/tags", ac.CreateTag)
-	router.Get("/api/v1/tag/{id}", ac.GetTag)
-	router.Delete("/api/v1/tag/{id}", ac.DeleteTag)
-	router.Patch("/api/v1/tag/{id}", ac.UpdateTag)
+	router.Get("/api/v1/search", ac.SearchLinks)
 	//
 	router.Get("/healthz", ac.Health)
 	router.Handle("/favicon.ico", http.FileServer(http.FS(serverRoot)))
