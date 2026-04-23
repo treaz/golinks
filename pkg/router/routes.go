@@ -30,6 +30,7 @@ func NewRouter(db *database.DbConnection) *chi.Mux {
 
 	router := chi.NewRouter()
 	// routes links
+	router.Use(ac.DecodeSlashes)
 	router.Use(ac.LogRequest)
 	router.Get("/api/v1/links", ac.GetLinks)
 	router.Post("/api/v1/links", ac.CreateLink)
