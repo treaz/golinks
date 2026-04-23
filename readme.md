@@ -11,8 +11,9 @@
     - [Run](#run)
     - [Run At Startup](#run-at-startup)
     - [Docker](#docker)
-    - [Browser Extension Redirect Setup (Recommended)](#browser-extension-redirect-setup-recommended)
-      - [Using Redirector Extension](#using-redirector-extension)
+    - [Browser Setup (Keyword Search)](#browser-setup-keyword-search)
+      - [Chrome / Brave / Edge / Arc](#chrome--brave--edge--arc)
+      - [Firefox](#firefox)
     - [DNS Setup (Manual)](#dns-setup-manual)
     - [Port Redirection Setup (Manual)](#port-redirection-setup-manual)
   - [FAQ](#faq)
@@ -110,29 +111,36 @@ docker build . -t crhuber/golinks:latest
 docker run -p 8998:8998 crhuber/golinks
 ```
 
-### Browser Extension Redirect Setup (Recommended)
+### Browser Setup (Keyword Search)
 
-For a true go/alias experience in your browser, you can use a redirect browser extension instead of complex DNS and port configuration.
+Modern browsers (Chrome, Firefox, Safari, etc.) no longer reliably navigate
+bare single-label hostnames like `go/foo` — they treat them as search queries.
+Instead of fighting the browser with a redirect extension, register golinks as
+a custom search keyword.
 
-#### Using Redirector Extension
+#### Chrome / Brave / Edge / Arc
 
-1.  **Install the Extension:**
-    *   Redirector for Chrome
-    *   Redirector for Firefox
+Go to `chrome://settings/searchEngines` → **Site search** → **Add**:
 
-2.  **Configure a Redirect Rule:**
-    *   Open extension settings
-    *   Add a new redirect with these settings:
-        *   **Description:** `GoLink Redirector`
-        *   **Example URL:** `http://go/docs`
-        *   **Include pattern:** `^http://go/(.*)$`
-        *   **Redirect to:** `http://go/$1` or if you didn't update the `/etc/hosts` file `http://localhost:8998/$1`
-        *   **Pattern type:** `Regular Expression`
+- **Name:** `GoLinks`
+- **Shortcut:** `go`
+- **URL:** `http://localhost:8998/%s`
 
-3.  **Usage:**
-    *   Simply type `go/docs` (or any alias) in your browser's address bar.
-    *   The extension will redirect to your local GoLink server.
-    *   **Note:** You must first open the link using `http://go/{alias}` for each link before the browser will recognize this as a valid path. (You can use the `open` command to do this quickly). This is because the browser will try search first if the url is not recognized.
+Usage: `go<space>foo` → `http://localhost:8998/foo`
+
+#### Firefox
+
+Firefox URL-encodes `/` inside `%s`, which breaks variable links like
+`go gh/torvalds`. Use a bookmarklet that decodes it back:
+
+1. Open **Bookmarks → Manage Bookmarks** (`Cmd/Ctrl+Shift+O`)
+2. Right-click any folder → **Add Bookmark…**
+3. Fill in:
+   - **Name:** `GoLinks`
+   - **URL:** `javascript:void(location.href='http://localhost:8998/'+decodeURIComponent('%s'))`
+   - **Keyword:** `go`
+
+Usage: `go<space>foo` or `go<space>gh/torvalds` → `http://localhost:8998/gh/torvalds`
 
 
 ## FAQ
