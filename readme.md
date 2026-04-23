@@ -176,12 +176,28 @@ running...
 INFO[0000] Starting server on port :8998
 ```
 
+### Makefile
+
+Common tasks are wrapped in a `Makefile`. Run `make help` to list them:
+
+```
+build           Build the binary
+run             Run the server
+dev             Run with live reload (air)
+test            Run tests
+vet             Run go vet
+fmt             Format code
+tidy            Tidy go modules
+clean           Remove build artifacts
+docker-build    Build Docker image
+```
+
 ### Testing
 
 To run the test suite:
 
 ```bash
-go test ./...
+make test
 ```
 
 ## Roadmap
